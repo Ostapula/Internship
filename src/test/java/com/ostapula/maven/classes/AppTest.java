@@ -5,9 +5,6 @@ import java.util.*;
 import org.junit.Test;
 import org.junit.Before;
 
-/**
- * Unit test for simple App.
- */
 public class AppTest 
 {
 	private List<Integer> sx;
