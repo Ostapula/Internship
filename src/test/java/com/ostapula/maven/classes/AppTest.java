@@ -5,9 +5,6 @@ import java.util.*;
 import org.junit.Test;
 import org.junit.Before;
 
-/**
- * Unit test for simple App.
- */
 public class AppTest 
 {
 	private List<Integer> sx;
@@ -23,6 +20,6 @@ public class AppTest
     	List<Integer> copySx = new ArrayList<Integer>(sx);
     	copySx.sort(null);    	
     	
-    	assertEquals(App.sortIntegers(sx), copySx);
+    	assertEquals(copySx, App.sortIntegers(sx));
     }
 }
