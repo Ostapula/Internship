@@ -31,7 +31,6 @@ public class App
 	}
 	
 	public static void merge(List<Integer> copyXs, int listSize, int currSize, int left) {
-        System.out.println("currSize " + currSize + " | left " + left);
 		int mid = left + currSize;
         if (mid >= listSize) {
             mid = listSize - 1;
