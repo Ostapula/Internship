@@ -4,8 +4,38 @@ public class App
 {
     public static void main( String[] args )
     {
-        int n = 5;
-        System.out.println("The Non-tail recursion: " + factorialNonTailRecursion(n) + " The Tail-recursion: " + factorialTailRecursion(n));
+    	int nonTailMax = maxIntNonTailRecursion();
+    	int tailMax = maxIntTailRecursion();
+    	
+    	if (nonTailMax >= tailMax) {
+    		System.out.println("The function IS NOT benefiting from tail recursion: non-tail recursion: " + nonTailMax + " >= tail recursion: " + tailMax);
+    	} else {
+    		System.out.println("The function IS benefiting from tail recursion: non-tail recursion: " + nonTailMax + " < tail recursion: " + tailMax);
+    	}   	
+    }
+    
+    public static int maxIntNonTailRecursion() {
+    	int n = 1;
+    	while(true) {
+    		try {
+    			factorialNonTailRecursion(n);
+    			n++;
+    		} catch (StackOverflowError e) {
+    			return n - 1;
+    		}
+    	}
+    }
+    
+    public static int maxIntTailRecursion() {
+    	int n = 1;
+    	while(true) {
+    		try {
+    			factorialTailRecursion(n);
+    			n++;
+    		} catch (StackOverflowError e) {
+    			return n - 1;
+    		}
+    	}
     }
     
     public static int factorialNonTailRecursion(int n) {
