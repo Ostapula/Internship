@@ -1,7 +1,11 @@
-package com.ostapula.factorial.classes;
+package com.ostapula.recursioncomparison;
 
-public class App 
+public class RecursionComparison 
 {
+	private RecursionComparison() {
+		throw new AssertionError();
+	}
+	
     public static void main( String[] args )
     {
     	int nonTailMax = maxIntNonTailRecursion();
