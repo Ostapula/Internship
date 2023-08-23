@@ -37,7 +37,7 @@ class MergeSort {
 				}
 			}
 		}
-		
+
 		int listSize = copyXs.size();
 		int left = 0;
 		mergeSort(copyXs, listSize, left);
@@ -50,7 +50,7 @@ class MergeSort {
 	private static int mergeSort(List<Integer> copyXs, int listSize, int left) {
 		return mergeSort(copyXs, listSize, left, 0, 0, 1);
 	}
-	
+
 	private static int mergeSort(List<Integer> copyXs, int listSize, int left, int mid, int right, int currSize) {
 		if (currSize >= listSize) {
 			return 1;
@@ -62,22 +62,22 @@ class MergeSort {
 		if (mid >= listSize) {
 			mid = listSize - 1;
 		}
-		
+
 		right = left + currSize * 2;
 		if (right >= listSize) {
 			right = listSize;
 		} 
-		
+
 		merge(copyXs, left, mid, right);
-		
+
 		return mergeSort(copyXs, listSize, left += currSize * 2, 0, 0, currSize);
 	}
-	
+
 	private static void merge(List<Integer> copyXs, int left, int mid, int right) {
-		
+
 		List<Integer> leftList = new ArrayList<Integer>(copyXs.subList(left, mid));
 		List<Integer> rightList = new ArrayList<Integer>(copyXs.subList(mid, right));
-			
+
 		int i = 0, j = 0, k = left;
 		while (i < leftList.size() && j < rightList.size()) {
 			if (leftList.get(i) <= rightList.get(j)) {
