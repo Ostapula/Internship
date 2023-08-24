@@ -24,9 +24,12 @@ class MergeSort {
 	}
 
 	protected static List<Integer> sortIntegers(List<Integer> xs) {
-		if (xs.isEmpty()) {
-			throw new IllegalArgumentException("The list cannot be empty!");
-		} 
+		if (xs == null) {
+			throw new IllegalArgumentException("The list cannot be null!");
+		} else if(xs.isEmpty()) {
+			return xs;
+		}
+
 		List<Integer> copyXs = new ArrayList<Integer>(xs);
 		if (copyXs.contains(null)) {
 			for (int i = 0; i < copyXs.size(); i++) {
@@ -41,6 +44,7 @@ class MergeSort {
 		int listSize = copyXs.size();
 		int left = 0;
 		mergeSort(copyXs, listSize, left);
+
 		for (int i = 0; i < counter; i++) {
 			copyXs.add(i, null);
 		}

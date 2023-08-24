@@ -36,9 +36,17 @@ public class MergeSortTest
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testSortingEmptyListThrowsException() {
+	public void testSortingNullListThrowsException() {
+		List<Integer> inputList = null;
+		MergeSort.sortIntegers(inputList);
+	}
+
+	@Test
+	public void testSortingEmptyListReturnsEmptyList() {
 		List<Integer> inputList = new ArrayList<Integer>();
-		MergeSort.sortIntegers(inputList);        
+		List<Integer> emptyList = new ArrayList<Integer>();
+		MergeSort.sortIntegers(inputList);
+		assertEquals(emptyList, inputList);
 	}
 
 	@Test
