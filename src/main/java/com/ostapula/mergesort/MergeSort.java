@@ -7,11 +7,9 @@ class MergeSort {
 	private MergeSort() {
 		throw new AssertionError();
 	}
-	
-	private static int counter = 0;
 
 	public static void main( String[] args ) {
-		List<Integer> xs = new ArrayList<Integer>();
+		final List<Integer> xs = new ArrayList<Integer>();
 		generateInteger(xs); 
 		System.out.println("Not sorted list " + xs + ". Sorted list " + sortIntegers(xs));
 	}
@@ -26,31 +24,23 @@ class MergeSort {
 	protected static List<Integer> sortIntegers(List<Integer> xs) {
 		if (xs == null) {
 			throw new IllegalArgumentException("The list cannot be null!");
-		} else if(xs.isEmpty()) {
+		} else if (xs.isEmpty()) {
 			return xs;
 		}
 
 		List<Integer> copyXs = new ArrayList<Integer>(xs);
-		if (copyXs.contains(null)) {
-			for (int i = 0; i < copyXs.size(); i++) {
-				if(copyXs.get(i) == null) {
-					copyXs.remove(i);
-					counter++;
-					i--;
-				}
-			}
-		}
+		copyXs.removeAll(Collections.singleton(null));
 
 		int listSize = copyXs.size();
-		int left = 0;
-		mergeSort(copyXs, listSize, left);
+		mergeSort(copyXs, listSize, 0);
 
-		for (int i = 0; i < counter; i++) {
+		for (int i = 0; i < xs.size() - listSize; i++) {
 			copyXs.add(i, null);
 		}
+
 		return copyXs;
 	}
-	
+
 	private static int mergeSort(List<Integer> copyXs, int listSize, int left) {
 		return mergeSort(copyXs, listSize, left, 0, 0, 1);
 	}
