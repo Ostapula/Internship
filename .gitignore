@@ -1,0 +1,7 @@
+pom.xml
+.project
+.classpath
+target/classes/com/ostapula/maven/classes/App.class
+target/classes/com/ostapula/maven/classes/Merge.class
+target/test-classes/com/ostapula/maven/classes/AppTest.class
+target/test-classes/com/ostapula/maven/classes/MergeTest.class
