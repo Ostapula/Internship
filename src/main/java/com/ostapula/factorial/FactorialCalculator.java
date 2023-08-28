@@ -2,7 +2,11 @@ package com.ostapula.factorial;
 
 public class FactorialCalculator {
 
-	public int factorialNonTailRecursion(int n) {
+	private FactorialCalculator() {
+		throw new AssertionError();
+	}
+
+	public  static int factorialNonTailRecursion(int n) {
 		if (n == 1) {
 			return n;
 		}
@@ -10,11 +14,11 @@ public class FactorialCalculator {
 		return n * result;
 	}
 
-	public int factorialTailRecursion(int n) {
+	public static int factorialTailRecursion(int n) {
 		return factorialTailRecursion(n, 1);
 	}
 
-	private int factorialTailRecursion(int n, int result) {
+	private static int factorialTailRecursion(int n, int result) {
 		if (n == 0) {
 			return result;
 		}
