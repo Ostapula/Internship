@@ -5,10 +5,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.ostapula.maven</groupId>
-  <artifactId>maven-ostapula-jar</artifactId>
+  <artifactId>maven-ostapula-sort</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
-  <name>maven-ostapula-jar</name>
+  <name>maven-ostapula-sort</name>
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
 
