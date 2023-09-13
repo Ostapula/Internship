@@ -209,4 +209,25 @@ public class AppTest {
 		}
 		assertEquals(expectedList, SortApp.sortObjects(inputList));
 	}
+
+	@Test
+	public void testNullNameOrSurnameAreSmallerThanAnyObject() {
+		List<Person> inputList = Arrays.asList(
+				new Person("William", "Williams"),
+				new Person("Emily", "Smith"),
+				new Person("Jessica", "Turner"),
+				new Person("Emma", "Thompson"),
+				new Person("Jess", "Turney"),
+				new Person("Jessica", "Turner"),
+				new Person("John", null),
+				new Person("Johnathon", "Smythe"),
+				new Person("Michael", "Johnson"),
+				new Person("Mike", "Jonson"),
+				new Person("Emma", "Thompson"),
+				new Person(null, "Thomason"));
+				
+		List<Person> expectedList = new ArrayList<Person>(inputList);
+		expectedList.sort(null);
+		assertEquals(expectedList, SortApp.sortObjects(inputList));
+	}
 }

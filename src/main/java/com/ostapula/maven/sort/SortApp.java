@@ -6,18 +6,49 @@ public class SortApp {
 
 	public static void main( String[] args ) {
 		List<Integer> xs = Arrays.asList(23, 12, 1, 5, 87, 56, 34, 9, 20, 8);
-		List<Person> persons = new ArrayList<>();
-		persons.add(new Person("John", "b"));
-		persons.add(new Person("Ostap", "Zabanzhalo"));
-		persons.add(new Person("John", "c"));
-		persons.add(new Person("John", "d"));
-		persons.add(new Person("Ostap", "Yabanzhalo"));
-		persons.add(new Person("John", "a"));
-		persons.add(new Person("John", "b"));
-		persons.add(new Person("Astap", "Yabanzhalo"));
-		persons.add(new Person("John", "a"));
+		List<Person> persons1 = Arrays.asList(
+			new Person("John", "Doe"),
+			new Person("Anna", "Brown"),
+			new Person("Bob", "Clark"),
+			new Person("Catherine", "Evans"),
+			new Person("Daniel", "Fox"),
+			new Person("Eva", "Green"),
+			new Person("Frank", "Hill"),
+			new Person("Grace", "Ivanova"),
+			new Person("Harry", "Jones"),
+			new Person("Iris", "Kelly"),
+			new Person("joHn", "doE"),
+			new Person("DANiel", "fOX"),
+			new Person("eva", "Green"),
+			new Person("Eva", "Green"),
+			new Person("Jöhn", "Döe"),
+			new Person("Ann-a", "Br+own"),
+			new Person("Daniel-", "Fox"),
+			new Person("Daniel", "Fox"),
+			new Person(" Daniel", "Fox"),
+			new Person("Daniel ", "Fox"),
+			new Person("Anna", "B  Brown"),
+			new Person("", "Jones"),
+			new Person(null, "Kelly"),
+			new Person("Kelly", null),
+			new Person(null, "Kelly"),
+			new Person("Kelly", null),
+			new Person("Dan", "Fox"),
+			new Person("Joh", "Doe"),
+			new Person("John", "Doe"),
+			new Person("Iris", "Kelly"),
+			new Person("Iris", "Kelly"),
+			new Person("Frank", "Hill"),
+			new Person("Frank", "Jones"),
+			new Person("I", "K"),
+			new Person("IsabellaCharlotteSophia", "JohnsonClarkEvans"),
+			new Person("Éva", "Gréen"),
+			new Person("Иван", "Иванов"),
+			new Person("Jo!@#hn", "Do!!@#e"),
+			new Person("Bob", "Adams"),
+			new Person("Bob", "Clark"));
 		System.out.println("Unsorted list: " + xs + ". \n Sorted one " + sortObjects(xs));
-		System.out.println("Unsorted list: " + persons + ". \n Sorted one " + sortObjects(persons));
+		System.out.println("Unsorted list: " + persons1 + ". \n Sorted one " + sortObjects(persons1));
 	}
 
 	protected static <T extends Comparable<T>> List<T> sortObjects(List<T> xs) {
