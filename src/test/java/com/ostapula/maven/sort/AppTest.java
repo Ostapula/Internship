@@ -231,26 +231,26 @@ public class AppTest {
 		assertEquals(expectedList, SortApp.sortObjects(inputList));
 	}
 
-    @Test
-    // FIXME modify compareTo() so that this test passes
-    public void when_names_are_null_only_surnames_are_compared() {
-        // null == null, b > a
-        assertEquals(1, new Person(null, "b").compareTo(new Person(null, "a")));
-        // null == null, a == a
-        assertEquals(0, new Person(null, "a").compareTo(new Person(null, "a")));
-        // null == null, a < b
-        assertEquals(-1, new Person(null, "a").compareTo(new Person(null, "b")));
-    }
+	@Test
+	// FIXME modify compareTo() so that this test passes
+	public void when_names_are_null_only_surnames_are_compared() {
+		// null == null, b > a
+		assertEquals(1, new Person(null, "b").compareTo(new Person(null, "a")));
+		// null == null, a == a
+		assertEquals(0, new Person(null, "a").compareTo(new Person(null, "a")));
+		// null == null, a < b
+		assertEquals(-1, new Person(null, "a").compareTo(new Person(null, "b")));
+	}
 
-    @Test
-    // FIXME modify compareTo() so that this test passes
-    public void when_surnames_are_null_only_names_are_compared() {
-        // a < b, null == null
-        assertEquals(-1, new Person("a", null).compareTo(new Person("b", null)));
-        // a == a, null == null
-        assertEquals(0, new Person("a", null).compareTo(new Person("a", null)));
-        // b > a, null == null
-        assertEquals(1, new Person("b", null).compareTo(new Person("a", null)));
-    }
+	@Test
+	// FIXME modify compareTo() so that this test passes
+	public void when_surnames_are_null_only_names_are_compared() {
+		// a < b, null == null
+		assertEquals(-1, new Person("a", null).compareTo(new Person("b", null)));
+		// a == a, null == null
+		assertEquals(0, new Person("a", null).compareTo(new Person("a", null)));
+		// b > a, null == null
+		assertEquals(1, new Person("b", null).compareTo(new Person("a", null)));
+	}
 
 }

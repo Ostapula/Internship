@@ -35,11 +35,15 @@ public class Person implements Comparable<Person>{
 
 	@Override
 	public int compareTo(Person p) {
+		if (this.name == null && p.getName() == null)
+			return this.surname.replaceAll(" ", "").compareToIgnoreCase(p.getSurname().replaceAll(" ", ""));
+		if (this.surname == null && p.getSurname() == null)
+			return this.name.replaceAll(" ", "").compareToIgnoreCase(p.getName().replaceAll(" ", ""));
 		if (p.getName() == null || p.getSurname() == null) {
 			if (this.name == null)
 				return -1;
 			return 1;
-		} else if (this.name == null || this.surname == null) 
+		} else if (this.name == null || this.surname == null)
 			return -1;
 		if (this.equals(p))
 			return 0;
