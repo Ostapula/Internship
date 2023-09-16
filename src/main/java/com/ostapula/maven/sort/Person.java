@@ -30,6 +30,8 @@ public class Person implements Comparable<Person>{
 		if (!(o instanceof Person))
 			return false;
 		Person p = (Person) o;
+		if (name == null || p.getName() == null || surname == null || p.getSurname() == null)
+			return false;
 		return name.equals(p.getName()) && surname.equals(p.getSurname());
 	}
 
@@ -38,7 +40,12 @@ public class Person implements Comparable<Person>{
 		int result = compare(this.name, p.getName());
 		if (result != 0)
 			return result;
-		return compare(this.surname, p.getSurname());
+		result = compare(this.surname, p.getSurname());
+		if (result != 0)
+			return result;
+		if (this.equals(p))
+			return 0;
+		return result;
 	}
 
 	private int compare(String string1, String string2) {
@@ -48,8 +55,6 @@ public class Person implements Comparable<Person>{
 			return -1;
 		if (string2 == null)
 			return 1;
-		if (string1.equals(string2))
-			return 0;
 		return string1.replaceAll(" ", "").compareToIgnoreCase(string2.replaceAll(" ", ""));
 	}
 
