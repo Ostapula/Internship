@@ -37,15 +37,12 @@ public class Person implements Comparable<Person>{
 
 	@Override
 	public int compareTo(Person p) {
+		if (this.equals(p))
+			return 0;
 		int result = compare(this.name, p.getName());
 		if (result != 0)
 			return result;
-		result = compare(this.surname, p.getSurname());
-		if (result != 0)
-			return result;
-		if (this.equals(p))
-			return 0;
-		return result;
+		return compare(this.surname, p.getSurname());
 	}
 
 	private int compare(String string1, String string2) {
