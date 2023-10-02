@@ -3,6 +3,7 @@ package ucu.learning;
 import static java.lang.String.format;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -212,31 +214,88 @@ public class App {
 		return empty();
 	}
 
-	public static Optional<Exception> transfer(final Long fromAccount, final Long toAccount, final BigDecimal amount,
+	public static class Result<T> {
+		private final Optional<T> value;
+		private final Optional<Exception> ex;
+
+		private Result(final T value, final Exception ex) {
+			this.value = ofNullable(value);
+			this.ex = ofNullable(ex);
+		}
+
+		public static <V> Result<V> success(final V value) {
+			return new Result<V>(value, null);
+		}
+
+		public static <V> Result<V> failure(final Exception ex) {
+			return new Result<V>(null, ex);
+		}
+
+		public static <V> Result<V> failure(final String msgError) {
+			return failure(new Exception(msgError));
+		}
+
+		public T get() {
+			return value.get();
+		}
+
+		public Optional<Exception> error() {
+			return ex;
+		}
+
+		public void ifPresent(final Consumer<? super T> action) {
+			value.ifPresent(action);
+		}
+
+		public <U> Result<U> map(final Function<? super T, ? extends U> mapper) {
+			final Optional<? extends U> mapped = value.map(mapper);
+			return (Result<U>) mapped.map(v -> success(v)).orElse(failure("Nothing map over"));
+		}
+
+		public <U> Result<U> flatMap(final Function<? super T, Result<U>> mapper) {
+			final Optional<Result<U>> r = value.map(v -> mapper.apply(v));
+			return r.orElse(failure("Nothing to map over"));
+		}
+	}
+
+	public static Result<Long> transfer(final Long fromAccount, final Long toAccount, final BigDecimal amount,
 			final Connection conn) {
 		try {
+			if (false == conn.getAutoCommit()) {
+				return Result.failure("Cannot be executed in the scope of another transaction.");
+			}
 			conn.setAutoCommit(false);
 
 			// 1: update fromAccount with fromAccount.amount = fromAccount.amount - amount
 			final Optional<BigDecimal> opFromAmount = bankAccountAmount(fromAccount, conn);
 			if (opFromAmount.isPresent()) {
 				final BigDecimal fromAmount = opFromAmount.get();
-				updateAmountOnAccount(fromAccount, fromAmount.subtract(amount), conn);
+				if (1 != updateAmountOnAccount(fromAccount, fromAmount.subtract(amount), conn)) {
+					return Result.failure(format("Could not update the amount for account [%s]", fromAccount));
+				}
+			} else {
+				return Result.failure(format("Could not get thr amount for account [%s]", fromAccount));
 			}
 
 			// 2: update toAccount with toAccount.amount = toAccount.amount + amount
 			final Optional<BigDecimal> opToAmount = bankAccountAmount(toAccount, conn);
 			if (opToAmount.isPresent()) {
 				final BigDecimal toAmount = opToAmount.get();
-				updateAmountOnAccount(toAccount, toAmount.add(amount), conn);
+				if (1 != updateAmountOnAccount(toAccount, toAmount.add(amount), conn)) {
+					return Result.failure(format("Could not update the amount for account [%s]", toAccount));
+				}
+			} else {
+				return Result.failure(format("Could not get the amount for account [%s]", toAccount));
 			}
 
 			// 3: insert transfer describing this transfer
 			final Optional<Long> opTransferId = insertTransfer(fromAccount, toAccount, amount, new Date(), conn);
 			if (opTransferId.isPresent()) {
 				conn.commit();
+				return Result.success(opTransferId.get());
 			} else {
 				conn.rollback();
+				return Result.failure("Could not perform a transfer.");
 			}
 		} catch (final Exception ex) {
 			try {
@@ -245,10 +304,14 @@ public class App {
 				e.printStackTrace();
 			}
 			ex.printStackTrace();
-			return of(ex);
+			return Result.failure(ex);
+		} finally {
+			try {
+				conn.setAutoCommit(true);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
-
-		return empty();
 	}
 
 	public static List<Person> findPersonsBySurname(final String surname, final Connection conn) {
@@ -312,27 +375,32 @@ public class App {
 
 	public static void main(String[] args) throws ClassNotFoundException, SQLException {
 		System.out.println("Hello World!");
-		final Optional<Date> dob1 = mkDate(2020, 2, 31);
+
 		final String dbUrl = "jdbc:postgresql://localhost:5432/foundation";
 		try (final Connection conn = DriverManager.getConnection(dbUrl, "dbuser", "dbpassw0rd")) {
 			System.out.printf("The number of personnel records deleted: %s%n", deleteAllPersonnel(conn));
-
-			dob1.ifPresent(
-					date -> insertPerson("Zabanzhalo", "Ostap", date, conn).ifPresent(id -> System.out.println(id)));
-			final Optional<Long> account1 = insertPerson("Grace", "Hopper", java.sql.Date.valueOf("2001-01-01"), conn)
+			final Optional<Long> account1 = mkDate(1906, 12, 9)
+					.flatMap(dob -> insertPerson("Grace", "Hopper", dob, conn))
 					.flatMap(owner -> insertBankAccount("10000300", owner, new BigDecimal("25.00"), conn));
-			final Optional<Long> account2 = insertPerson("Barbara", "Liskov", java.sql.Date.valueOf("1968-05-30"), conn)
+			final Optional<Long> account2 = mkDate(1939, 12, 7)
+					.flatMap(dob -> insertPerson("Barbara", "Liskov", dob, conn))
 					.flatMap(owner -> insertBankAccount("10000301", owner, new BigDecimal("0.00"), conn));
 
 			findPersonsBySurname("';update myschema.person_ set dob_ = null ;-- -", conn).forEach(System.out::println);
+			System.out.println("\nCurrent persons: ");
 			allPersons(conn).forEach(System.out::println);
 
+			System.out.println("\nCreated bank accounts: ");
 			allBanckAccount(conn).forEach(System.out::println);
 
-			transfer(account1.get(), account2.get(), new BigDecimal("13.99"), conn);
+			System.out.println("\nPerforming transfer... ");
+			transfer(account1.get(), account2.get(), new BigDecimal("10.01"), conn).ifPresent(System.out::println);
 
+			System.out.println("\nBank account after the transfer: ");
+			allBanckAccount(conn).forEach(System.out::println);
+
+			System.out.println("\nAll transfers:");
 			allTransfers(conn).forEach(System.out::println);
-			allBanckAccount(conn).forEach(System.out::println);
 		}
 	}
 }
