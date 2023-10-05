@@ -1,4 +1,4 @@
-package ucu.learning;
+package ucu.learning.oop;
 
 import static java.lang.String.format;
 import static java.util.Optional.empty;
@@ -25,91 +25,6 @@ import java.time.ZoneId;
 public class App {
 
 	private static final AtomicLong idGen = new AtomicLong(System.currentTimeMillis() * 100000);
-
-	public static class Person {
-		public final Long id;
-		public final String surname;
-		public final String name;
-		public final Date dob;
-
-		public Person(final Long id, final String surname, final String name, final Date dob) {
-			this.id = id;
-			this.surname = surname;
-			this.name = name;
-			this.dob = dob;
-		}
-
-		@Override
-		public boolean equals(final Object obj) {
-			if (this == obj) {
-				return true;
-			}
-
-			if (!(obj instanceof Person)) {
-				return false;
-			}
-
-			final Person that = (Person) obj;
-
-			final boolean surnameEq = this.surname != null ? this.surname.equals(that.surname) : that.surname == null;
-			final boolean nameEq = this.name != null ? this.name.equals(that.name) : that.name == null;
-			return surnameEq && nameEq;
-		}
-
-		@Override
-		public int hashCode() {
-			int result = 0;
-			result = 31 * result +(this.surname != null ? this.surname.hashCode() : 0);
-			result = 31 * result +(this.name != null ? this.name.hashCode() : 0);
-			return result;
-		}
-
-		@Override
-		public String toString() {
-			return format("Person (%s, %s, %s, %s)", id, surname, name, dob);
-		}
-	}
-
-	public static class BankAccount {
-		public final Long id;
-		public final String number;
-		public final Long owner; // id of person
-		public final BigDecimal amount;
-
-		public BankAccount(final Long id, final String number, final Long owner, final BigDecimal amount) {
-			this.id = id;
-			this.number = number;
-			this.owner = owner;
-			this.amount = amount;
-		}
-
-		@Override
-		public String toString() {
-			return format("BankAccount (%s, %s, %s, %s)", id, number, owner, amount);
-		}
-	}
-
-	public static class Transfer {
-		public final Long id;
-		public final Long fromAccount; // id of the from-account
-		public final Long toAccount; // id of the to-person
-		public final BigDecimal amount;
-		public final Date transferDate;
-
-		public Transfer(final Long id, final Long fromAccount, final Long toAccount, final BigDecimal amount,
-				final Date transferDate) {
-			this.id = id;
-			this.fromAccount = fromAccount;
-			this.toAccount = toAccount;
-			this.amount = amount;
-			this.transferDate = transferDate;
-		}
-
-		@Override
-		public String toString() {
-			return format("Transfer (%s, %s, %s, %s, %s)", id, fromAccount, toAccount, amount, transferDate);
-		}
-	}
 
 	public static Optional<Long> insertPerson(final String surname, final String name, final Date dob,
 			final Connection conn) {
@@ -150,7 +65,8 @@ public class App {
 	}
 
 	public static Optional<Long> findAccountByNumber(final String accountNumber, final Connection conn) {
-		try (final PreparedStatement ps = conn.prepareStatement("select _id from myschema.bankaccount_ where number_ = ?")) {
+		try (final PreparedStatement ps = conn
+				.prepareStatement("select _id from myschema.bankaccount_ where number_ = ?")) {
 			ps.setString(1, accountNumber);
 			try (final ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
@@ -164,8 +80,8 @@ public class App {
 		return empty();
 	}
 
-	public static Optional<Long> insertTransfer(final String fromAccountNumber, final String toAccountNumber, final BigDecimal amount,
-			final Date transferDate, final Connection conn) {
+	public static Optional<Long> insertTransfer(final String fromAccountNumber, final String toAccountNumber,
+			final BigDecimal amount, final Date transferDate, final Connection conn) {
 		final long id = idGen.incrementAndGet();
 
 		final Long fromAccount = findAccountByNumber(fromAccountNumber, conn).get();
@@ -202,13 +118,31 @@ public class App {
 		return persons;
 	}
 
-	public static List<BankAccount> allBanckAccount(final Connection conn) {
+	public static Person findPersonById(final Long personId, final Connection conn) {
+		try (final PreparedStatement ps = conn.prepareStatement("select * from myschema.person_ where _id = ?")) {
+			ps.setLong(1, personId);
+			try (final ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					return new Person(rs.getLong("_id"), rs.getString("surname_"), rs.getString("name_"), rs.getDate("dob_"));
+				}
+
+			}
+		} catch (final Exception ex) {
+			ex.printStackTrace();
+		}
+		return null;
+	}
+
+	public static List<BankAccount> allBankAccount(final Connection conn) {
 		final var bankAccounts = new ArrayList<BankAccount>();
 		try (final Statement st = conn.createStatement();
-				final ResultSet rs = st.executeQuery("select * from myschema.bankaccount_")) {
+				final ResultSet rs = st.executeQuery(
+						"select p._id as personId, p.name_ as personName, p.surname_ as personSurname, p.dob_ as personDob,\r\n"
+								+ "	   b._id as accountId, b.number_ as accountNumber, b.amount_ as accountAmount, b._version as accountVersion\r\n"
+								+ "from myschema.bankaccount_ b join myschema.person_ p on b.owner_ = p._id ")) {
 			while (rs.next()) {
-				var ba = new BankAccount(rs.getLong("_id"), rs.getString("number_"), rs.getLong("owner_"),
-						rs.getBigDecimal("amount_"));
+				var p = new Person(rs.getLong("personId"), rs.getString("personSurname"), rs.getString("personName"), rs.getDate("personDob"));				
+				var ba = new BankAccount(rs.getLong("accountId"), rs.getString("accountNumber"), p, rs.getBigDecimal("accountAmount"));
 				bankAccounts.add(ba);
 			}
 		} catch (final Exception ex) {
@@ -424,28 +358,16 @@ public class App {
 			System.out.printf("The number of personnel records deleted: %s%n", deleteAllPersonnel(conn));
 			final Optional<Long> account1 = mkDate(1906, 12, 9)
 					.flatMap(dob -> insertPerson("Grace", "Hopper", dob, conn))
-					.flatMap(owner -> insertBankAccount("10000300", owner, new BigDecimal("1000.00"), conn));
-			final Optional<Long> account2 = mkDate(1939, 12, 7)
+					.flatMap(owner -> insertBankAccount("10000300", owner, new BigDecimal("25.00"), conn));
+			final Optional<Long> account2 = mkDate(1939, 11, 7)
 					.flatMap(dob -> insertPerson("Barbara", "Liskov", dob, conn))
-					.flatMap(owner -> insertBankAccount("10000301", owner, new BigDecimal("0.00"), conn));
+					.flatMap(owner -> insertBankAccount("10000301", owner, new BigDecimal("25.00"), conn));
 
-			findPersonsBySurname("';update myschema.person_ set dob_ = null ;-- -", conn).forEach(System.out::println);
 			System.out.println("\nCurrent persons: ");
 			allPersons(conn).forEach(System.out::println);
 
 			System.out.println("\nCreated bank accounts: ");
-			allBanckAccount(conn).forEach(System.out::println);
-
-			System.out.println("\nPerforming transfer... ");
-			if (account1.isPresent() && account2.isPresent()) {
-				transfer("10000300", "10000301", new BigDecimal("1000.00"), conn).ifPresent(System.out::println);	
-			}
-
-			System.out.println("\nBank account after the transfer: ");
-			allBanckAccount(conn).forEach(System.out::println);
-
-			System.out.println("\nAll transfers:");
-			allTransfers(conn).forEach(System.out::println);
+			allBankAccount(conn).forEach(System.out::println);
 		}
 	}
 }

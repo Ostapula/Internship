@@ -1,4 +1,4 @@
-package ucu.learning;
+package ucu.learning.optimistic;
 
 import static java.lang.String.format;
 import static java.util.Optional.empty;
@@ -75,12 +75,14 @@ public class App {
 		public final String number;
 		public final Long owner; // id of person
 		public final BigDecimal amount;
+		public final Long version;
 
-		public BankAccount(final Long id, final String number, final Long owner, final BigDecimal amount) {
+		public BankAccount(final Long id, final String number, final Long owner, final BigDecimal amount, final Long version) {
 			this.id = id;
 			this.number = number;
 			this.owner = owner;
 			this.amount = amount;
+			this.version = version;
 		}
 
 		@Override
@@ -202,13 +204,13 @@ public class App {
 		return persons;
 	}
 
-	public static List<BankAccount> allBanckAccount(final Connection conn) {
+	public static List<BankAccount> allBankAccount(final Connection conn) {
 		final var bankAccounts = new ArrayList<BankAccount>();
 		try (final Statement st = conn.createStatement();
 				final ResultSet rs = st.executeQuery("select * from myschema.bankaccount_")) {
 			while (rs.next()) {
 				var ba = new BankAccount(rs.getLong("_id"), rs.getString("number_"), rs.getLong("owner_"),
-						rs.getBigDecimal("amount_"));
+						rs.getBigDecimal("amount_"), rs.getLong("_version"));
 				bankAccounts.add(ba);
 			}
 		} catch (final Exception ex) {
@@ -434,7 +436,7 @@ public class App {
 			allPersons(conn).forEach(System.out::println);
 
 			System.out.println("\nCreated bank accounts: ");
-			allBanckAccount(conn).forEach(System.out::println);
+			allBankAccount(conn).forEach(System.out::println);
 
 			System.out.println("\nPerforming transfer... ");
 			if (account1.isPresent() && account2.isPresent()) {
@@ -442,7 +444,7 @@ public class App {
 			}
 
 			System.out.println("\nBank account after the transfer: ");
-			allBanckAccount(conn).forEach(System.out::println);
+			allBankAccount(conn).forEach(System.out::println);
 
 			System.out.println("\nAll transfers:");
 			allTransfers(conn).forEach(System.out::println);
