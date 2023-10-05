@@ -123,7 +123,8 @@ public class App {
 			ps.setLong(1, personId);
 			try (final ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
-					return new Person(rs.getLong("_id"), rs.getString("surname_"), rs.getString("name_"), rs.getDate("dob_"));
+					return new Person(rs.getLong("_id"), rs.getString("surname_"), rs.getString("name_"),
+							rs.getDate("dob_"));
 				}
 
 			}
@@ -141,8 +142,10 @@ public class App {
 								+ "	   b._id as accountId, b.number_ as accountNumber, b.amount_ as accountAmount, b._version as accountVersion\r\n"
 								+ "from myschema.bankaccount_ b join myschema.person_ p on b.owner_ = p._id ")) {
 			while (rs.next()) {
-				var p = new Person(rs.getLong("personId"), rs.getString("personSurname"), rs.getString("personName"), rs.getDate("personDob"));				
-				var ba = new BankAccount(rs.getLong("accountId"), rs.getString("accountNumber"), p, rs.getBigDecimal("accountAmount"));
+				var p = new Person(rs.getLong("personId"), rs.getString("personSurname"), rs.getString("personName"),
+						rs.getDate("personDob"));
+				var ba = new BankAccount(rs.getLong("accountId"), rs.getString("accountNumber"), p,
+						rs.getBigDecimal("accountAmount"), rs.getLong("accountVersion"));
 				bankAccounts.add(ba);
 			}
 		} catch (final Exception ex) {
